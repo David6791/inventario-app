@@ -1,0 +1,108 @@
+<div class="card border-left-primary">
+    <div class="card-header">        
+        <div class="d-flex justify-content-between">
+            <h6 class="card-title text-primary"> {{$componentName}} / {{$pageTitle}}</h6>
+            <a class="btn btn-success btn-sm" href="javascript:void(0)" role="button" data-toggle="modal" data-target="#theModal"> 
+                Agregar
+                <i class="fas fa-plus fa-sm fa-fw text-gray-400"></i>
+            </a>                        
+        </div>
+    </div>               
+    <div class="card-body">
+    @include('common.searchbox')
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped mt-1">
+                <thead class="text-white" style="background: #003471">
+                    <tr>
+                        <th class="table-th text-white">ID</th>
+                        <th class="table-th text-white">DESCRIPCION</th>
+                        <th class="table-th text-white">ACCION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($permisos as $per)
+                        <tr>
+                            <td>{{ $per->id }}</td>
+                            <td>{{ $per->name }}</td>                                        
+                            <td class="text-center">
+                                <a href="javascript:void(0)" wire:click="Edit({{$per->id}})" class="btn btn-info btn-sm" title="Editar Registro">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="javascript:void(0)" onclick="Confirm('{{$per->id}}')" class="btn btn-danger btn-sm" title="Borrar Registro">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            {{ $permisos->links() }}
+        </div>
+    </div>
+    <div class="card-footer"></div>            
+@include('livewire.permisos.form')
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        //para escuchar eventos
+        window.livewire.on('permiso-added',msg => {
+            $('#theModal').modal('hide');
+            Toast.fire({
+                icon: 'success',
+                title: msg
+            })
+        });
+        window.livewire.on('permiso-updated',msg => {
+            $('#theModal').modal('hide');
+            Toast.fire({
+                icon: 'success',
+                title: msg
+            })
+        });
+        window.livewire.on('permiso-deleted',msg => {
+            Toast.fire({
+                icon: 'success',
+                title: msg
+            })
+        });
+        window.livewire.on('permiso-exists',msg => {
+            Toast.fire({
+                icon: 'error',
+                title: msg
+            })
+        });
+        window.livewire.on('permiso-error',msg => {
+            Toast.fire({
+                icon: 'error',
+                title: msg
+            })
+        });
+        window.livewire.on('hide-modal',msg => {
+            $('#theModal').modal('hide');            
+        });
+        window.livewire.on('show-modal',msg => {
+            $('#theModal').modal('show');            
+        });        
+    });
+    function Confirm(id,products){
+        if(products > 0){
+            Swal.fire('NO SE PUEDE ELIMINAR LA CATEGORIA PORQUE TIENE PRODUCTOS RELACIONADOS')
+            return;
+        }
+        Swal.fire({
+            title: 'Confirmar',
+            text: 'Confirmas Eliminar el Registro',
+            type: 'warning',
+            showCancelButton: true,
+            cancelButtonText: 'CERRAR',
+            CancelButtonColor: '#fff',
+            confirmButtonColor: '#3b3f5c',
+            confirmButtonText: 'Aceptar'
+        }).then(function(result){
+            if(result.value){
+                window.livewire.emit('destroy', id);
+                swal.close();
+            }
+        });
+    }
+</script>
